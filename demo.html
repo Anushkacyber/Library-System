@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LibraFlow — Redesigned UI/UX Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#0d0d0d;--surface:#f4f6fa;--white:#fff;--border:#e8ecf4;--sub:#94a3b8;--mid:#475569;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#e5e9f2;color:var(--ink);-webkit-font-smoothing:antialiased;}
+.demo-nav{background:#0d0d0d;display:flex;align-items:center;gap:2px;padding:0 16px;position:sticky;top:0;z-index:200;overflow-x:auto;scrollbar-width:none;}
+.demo-nav::-webkit-scrollbar{display:none;}
+.demo-logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;color:#fff;font-size:16px;padding:14px 16px 14px 4px;border-right:1px solid rgba(255,255,255,.08);margin-right:8px;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#0d0d0d;}
+.nav-btn{padding:12px 14px;color:rgba(255,255,255,.4);font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;white-space:nowrap;transition:all .2s;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;}
+.nav-btn:hover{color:rgba(255,255,255,.8);}
+.nav-btn.active{color:#fff;border-bottom-color:#fff;}
+.view{display:none;} .view.active{display:flex;}
+.view-block{display:none;} .view-block.active{display:block;}
+.sidebar{width:72px;background:#0d0d0d;display:flex;flex-direction:column;align-items:center;padding:18px 0;flex-shrink:0;min-height:calc(100vh - 46px);}
+.sb-logo{width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;color:#0d0d0d;margin-bottom:28px;}
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:4px;align-items:center;width:100%;}
+.sb-item{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.3);border:none;background:none;}
+.sb-item:hover{color:rgba(255,255,255,.7);}
+.sb-item.active{background:#fff;color:#0d0d0d;}
+.sb-bottom{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.sb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;border:2px solid rgba(255,255,255,.15);}
+.main-wrap{flex:1;display:flex;min-height:calc(100vh - 46px);background:var(--surface);}
+.center{flex:1;padding:28px 24px;overflow-y:auto;}
+.right-panel{width:300px;flex-shrink:0;background:#fff;border-left:1px solid var(--border);padding:24px 18px;display:flex;flex-direction:column;gap:18px;}
+.greeting-card{background:#fff;border-radius:18px;border:1px solid var(--border);padding:24px 28px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+.greeting-glow{position:absolute;right:130px;top:-40px;width:140px;height:140px;background:radial-gradient(circle,#e0e7ff,transparent 70%);border-radius:50%;pointer-events:none;}
+.greeting-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:26px;color:#0d0d0d;letter-spacing:-.5px;line-height:1.1;}
+.greeting-sub{font-size:12px;color:var(--sub);margin-top:4px;}
+.greeting-pill{margin-top:14px;display:inline-flex;align-items:center;gap:10px;background:#f8faff;border:1.5px solid #e0e7ff;border-radius:12px;padding:8px 14px;flex-wrap:wrap;}
+.pill-cover{width:24px;height:24px;border-radius:6px;background:linear-gradient(145deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.pill-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;color:#0d0d0d;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pill-sub{font-size:10px;color:var(--sub);}
+.pill-bar-wrap{width:72px;height:5px;background:#e8ecf4;border-radius:100px;overflow:hidden;flex-shrink:0;}
+.pill-bar{height:100%;background:#0d0d0d;border-radius:100px;width:58%;}
+.pill-btn{background:#0d0d0d;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.greeting-avatar{width:86px;height:86px;border-radius:20px;background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 8px 24px rgba(0,0,0,.12);flex-shrink:0;z-index:1;}
+.books-card{background:#fff;border-radius:18px;border:1px solid var(--border);padding:20px 20px 0;}
+.books-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.books-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;color:#0d0d0d;}
+.tabs{display:flex;gap:2px;background:#f8faff;border-radius:9px;padding:3px;}
+.tab{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--sub);font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tab.active{background:#0d0d0d;color:#fff;}
+.book-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #f1f5f9;transition:all .15s;cursor:pointer;}
+.book-row:last-child{border-bottom:none;}
+.book-row:hover{background:#f8faff;border-radius:8px;padding-left:10px;}
+.book-cover{width:36px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:rgba(255,255,255,.5);box-shadow:2px 2px 8px rgba(0,0,0,.1);}
+.book-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;color:#0d0d0d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.book-author{font-size:11px;color:var(--sub);margin-top:1px;}
+.book-time{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:3px;flex-shrink:0;white-space:nowrap;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;}
+.badge-blue{background:#eff6ff;color:#2563eb;}
+.badge-green{background:#f0fdf4;color:#16a34a;}
+.badge-red{background:#fef2f2;color:#dc2626;}
+.badge-amber{background:#fffbeb;color:#d97706;}
+.badge-gray{background:#f1f5f9;color:#64748b;}
+.view-btn{background:#0d0d0d;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;margin-left:auto;}
+.books-footer{border-top:1px solid #f1f5f9;padding:12px 0 6px;text-align:center;}
+.books-footer a{font-size:12px;color:#6366f1;font-weight:600;text-decoration:none;}
+.rp-search{display:flex;align-items:center;gap:8px;background:#f8faff;border:1.5px solid var(--border);border-radius:11px;padding:9px 13px;}
+.rp-search input{border:none;background:transparent;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;color:#0d0d0d;}
+.rp-search input::placeholder{color:var(--sub);}
+.rp-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rp-stat{background:#f8faff;border:1.5px solid var(--border);border-radius:13px;padding:15px 12px;}
+.rp-stat-n{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:26px;color:#0d0d0d;line-height:1;}
+.rp-stat-l{font-size:10px;color:var(--sub);margin-top:3px;line-height:1.3;}
+.chart-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;color:#0d0d0d;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.chart-filter{font-size:11px;font-weight:600;color:#0d0d0d;background:#f1f5f9;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.premium-card{background:linear-gradient(135deg,#f8faff,#eef2ff);border:1.5px solid #e0e7ff;border-radius:15px;padding:16px;}
+.premium-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.premium-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#0d0d0d;margin-bottom:3px;}
+.premium-sub{font-size:11px;color:var(--sub);line-height:1.5;margin-bottom:10px;}
+.premium-btn{background:#0d0d0d;color:#fff;border:none;border-radius:9px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.bk-page{flex:1;padding:28px 24px;background:var(--surface);}
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;margin-top:20px;}
+.bk-card-item{background:#fff;border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:all .2s;cursor:pointer;}
+.bk-card-item:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.07);}
+.bk-cover{height:110px;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;}
+.bk-body{padding:12px;}
+.bk-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;color:#0d0d0d;margin-bottom:3px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.bk-author{font-size:11px;color:var(--sub);margin-bottom:8px;}
+.bk-borrow-btn{width:100%;padding:7px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.hist-page{flex:1;padding:28px 24px;}
+.hist-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:#0d0d0d;letter-spacing:-.3px;}
+.hist-sub{font-size:12px;color:var(--sub);margin-top:3px;}
+.fine-banner{background:#0d0d0d;border-radius:16px;padding:18px 20px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.fine-icon{width:46px;height:46px;border-radius:13px;background:rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fine-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.fine-amount{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:#fff;line-height:1;}
+.fine-note{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;}
+.pay-btn{background:#fff;color:#0d0d0d;border:none;border-radius:10px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;}
+.hist-tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap;}
+.hist-tab{padding:7px 14px;border-radius:9px;font-size:12px;font-weight:600;border:1.5px solid var(--border);cursor:pointer;background:#fff;color:var(--sub);font-family:'DM Sans',sans-serif;transition:all .15s;}
+.hist-tab.active{background:#0d0d0d;color:#fff;border-color:#0d0d0d;}
+.hist-card{background:#fff;border-radius:16px;border:1px solid var(--border);}
+.hist-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f8faff;transition:background .15s;}
+.hist-row:last-child{border-bottom:none;}
+.hist-row:hover{background:#fafbff;}
+.hist-cover{width:34px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:rgba(255,255,255,.5);box-shadow:2px 2px 6px rgba(0,0,0,.1);}
+.hist-book-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;color:#0d0d0d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hist-book-author{font-size:11px;color:var(--sub);margin-top:1px;}
+.landing-page{background:var(--surface);}
+.ld-nav{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto;padding:20px 24px;}
+.ld-logo{display:flex;align-items:center;gap:10px;}
+.ld-logo-mark{width:36px;height:36px;border-radius:10px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:16px;}
+.ld-logo-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:17px;color:#0d0d0d;}
+.ld-cta{background:#0d0d0d;color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+.ld-signin{font-size:13px;font-weight:600;color:var(--mid);background:transparent;border:none;cursor:pointer;padding:8px 14px;border-radius:9px;font-family:'DM Sans',sans-serif;}
+.ld-hero{max-width:1100px;margin:0 auto;padding:50px 24px 32px;display:flex;align-items:center;gap:48px;flex-wrap:wrap;}
+.ld-hero-left{flex:1;min-width:280px;}
+.ld-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);color:var(--mid);font-size:11px;font-weight:700;padding:5px 12px;border-radius:100px;margin-bottom:20px;}
+.ld-chip-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:ldpulse 2s infinite;}
+@keyframes ldpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ld-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:clamp(34px,5vw,52px);line-height:1.05;letter-spacing:-1.5px;color:#0d0d0d;margin-bottom:16px;}
+.ld-em{background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ld-sub{font-size:14px;color:#64748b;line-height:1.7;margin-bottom:28px;max-width:440px;}
+.ld-btns{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+.ld-primary{display:inline-flex;align-items:center;gap:6px;background:#0d0d0d;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+.ld-secondary{background:#fff;color:var(--mid);border:1.5px solid var(--border);border-radius:12px;padding:11px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.ld-preview{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 16px 50px rgba(0,0,0,.06);width:340px;flex-shrink:0;}
+.ld-preview-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ld-plogo{width:30px;height:30px;border-radius:8px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:13px;}
+.ld-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.ld-pstat{background:#f8faff;border:1px solid var(--border);border-radius:12px;padding:12px 10px;}
+.ld-pstat-n{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:#0d0d0d;line-height:1;}
+.ld-pstat-l{font-size:10px;color:var(--sub);margin-top:2px;line-height:1.3;}
+.ld-pbooks{background:#f8faff;border:1px solid var(--border);border-radius:12px;padding:12px;}
+.ld-pbooks-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;color:#0d0d0d;margin-bottom:8px;}
+.ld-prow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;}
+.ld-prow:last-child{border-bottom:none;}
+.ld-pcover{width:22px;height:30px;border-radius:5px;flex-shrink:0;}
+.ld-ptitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;color:#0d0d0d;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ld-pauthor{font-size:10px;color:var(--sub);}
+.ld-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:1100px;margin:0 auto;padding:0 24px 40px;}
+.lstat{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:18px;text-align:center;}
+.lstat-n{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:26px;color:#0d0d0d;}
+.lstat-l{font-size:11px;color:var(--sub);margin-top:3px;}
+.feat-section{max-width:1100px;margin:0 auto;padding:0 24px 48px;}
+.feat-h{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:26px;color:#0d0d0d;text-align:center;margin-bottom:6px;}
+.feat-sub{font-size:13px;color:var(--sub);text-align:center;margin-bottom:28px;}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.feat{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px;transition:all .2s;}
+.feat:hover{border-color:#0d0d0d;box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.feat-icon{width:40px;height:40px;border-radius:11px;background:#f8faff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
+.feat-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#0d0d0d;margin-bottom:5px;}
+.feat-desc{font-size:11px;color:var(--sub);line-height:1.6;}
+.auth-wrap{display:flex;min-height:calc(100vh - 46px);}
+.auth-left{width:420px;flex-shrink:0;background:#0d0d0d;display:flex;flex-direction:column;padding:36px;position:relative;overflow:hidden;}
+.auth-glow{position:absolute;top:-80px;right:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(99,102,241,.2),transparent 70%);border-radius:50%;}
+.auth-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px;}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:auto;position:relative;z-index:1;}
+.auth-logo-mark{width:38px;height:38px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:17px;color:#0d0d0d;}
+.auth-logo-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:17px;color:#fff;}
+.auth-left-content{position:relative;z-index:1;}
+.auth-h{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:28px;color:#fff;line-height:1.1;margin-bottom:8px;}
+.auth-left-sub{font-size:13px;color:rgba(255,255,255,.4);line-height:1.6;margin-bottom:24px;}
+.auth-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.auth-stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:14px;}
+.auth-stat-n{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:18px;color:#fff;}
+.auth-stat-l{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;}
+.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;background:var(--surface);}
+.auth-form{width:100%;max-width:380px;}
+.auth-form-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:24px;color:#0d0d0d;margin-bottom:5px;}
+.auth-form-sub{font-size:13px;color:var(--sub);margin-bottom:22px;}
+.demo-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.demo-btn{padding:9px;border-radius:9px;font-size:11px;font-weight:700;border:1.5px solid;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.auth-label{display:block;font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.auth-input{width:100%;padding:10px 13px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;color:#0d0d0d;outline:none;margin-bottom:12px;transition:border-color .15s;}
+.auth-input:focus{border-color:#0d0d0d;}
+.auth-input::placeholder{color:var(--sub);}
+.auth-submit{width:100%;padding:12px;background:#0d0d0d;color:#fff;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-top:4px;transition:all .2s;}
+.auth-submit:hover{background:#1e1e1e;}
+.auth-bottom{text-align:center;font-size:12px;color:var(--sub);margin-top:16px;}
+.auth-bottom a{color:#0d0d0d;font-weight:700;text-decoration:none;}
+.alert-overdue{background:#fef2f2;border:1.5px solid #fecaca;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.seat-dark{background:#0d0d0d;border-radius:15px;padding:16px;color:#fff;}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spinMe{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<nav class="demo-nav">
+  <div class="demo-logo"><div class="logo-mark">L.</div>LibraFlow</div>
+  <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showPage('books')">Books</button>
+  <button class="nav-btn" onclick="showPage('history')">Borrow History</button>
+  <button class="nav-btn" onclick="showPage('landing')">Landing Page</button>
+  <button class="nav-btn" onclick="showPage('login')">Login</button>
+  <button class="nav-btn" onclick="showPage('register')">Register</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="view active">
+  <div class="sidebar">
+    <div class="sb-logo">L.</div>
+    <div class="sb-nav">
+      <button class="sb-item active" title="Dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+      <button class="sb-item" onclick="showPage('books')" title="Books"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></button>
+      <button class="sb-item" title="Seats"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></button>
+      <button class="sb-item" onclick="showPage('history')" title="History"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+    </div>
+    <div class="sb-bottom">
+      <button class="sb-item" style="color:rgba(255,255,255,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg></button>
+      <button class="sb-item" style="color:rgba(255,255,255,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      <div class="sb-avatar">JS</div>
+    </div>
+  </div>
+  <div class="main-wrap">
+    <div class="center">
+      <div class="greeting-card">
+        <div class="greeting-glow"></div>
+        <div style="z-index:1">
+          <div class="greeting-h1">Hello Josh!</div>
+          <div class="greeting-sub">Good morning — welcome back.</div>
+          <div class="greeting-pill">
+            <div class="pill-cover">📖</div>
+            <div><div class="pill-title">Clean Code</div><div class="pill-sub">Currently borrowed · 4 days left</div></div>
+            <div class="pill-bar-wrap"><div class="pill-bar"></div></div>
+            <button class="pill-btn">Continue</button>
+          </div>
+        </div>
+        <div class="greeting-avatar">👨‍🎓</div>
+      </div>
+      <div class="alert-overdue">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style="font-size:12px;color:#dc2626;flex:1"><strong>1 book overdue.</strong> Fines accumulate at ₹5/day. Total: ₹35.00.</p>
+        <a href="#" onclick="showPage('history');return false;" style="font-size:11px;font-weight:700;color:#dc2626;text-decoration:none">Pay →</a>
+      </div>
+      <div class="books-card">
+        <div class="books-head">
+          <div class="books-title">My Books</div>
+          <div class="tabs">
+            <button class="tab active" onclick="dashFilter(this,'all')">All Books</button>
+            <button class="tab" onclick="dashFilter(this,'active')">Active</button>
+            <button class="tab" onclick="dashFilter(this,'overdue')">Overdue</button>
+            <button class="tab" onclick="dashFilter(this,'due_soon')">Due Soon</button>
+          </div>
+        </div>
+        <div id="dash-books-list"></div>
+        <div class="books-footer"><a href="#" onclick="showPage('history');return false;">View all history →</a></div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="rp-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Search books…" oninput="dashSearch(this.value)"/>
+      </div>
+      <div class="rp-stats">
+        <div class="rp-stat"><div class="rp-stat-n">5</div><div class="rp-stat-l">Books<br>borrowed</div></div>
+        <div class="rp-stat"><div class="rp-stat-n" style="color:#dc2626">1</div><div class="rp-stat-l">Books<br>overdue</div></div>
+      </div>
+      <div>
+        <div class="chart-title">Your activity <button class="chart-filter">Weekly ↓</button></div>
+        <svg viewBox="0 0 260 100" style="width:100%;height:auto;overflow:visible">
+          <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d0d0d" stop-opacity=".08"/><stop offset="100%" stop-color="#0d0d0d" stop-opacity="0"/></linearGradient></defs>
+          <line x1="28" y1="10" x2="252" y2="10" stroke="#e8ecf4" stroke-width="1"/>
+          <line x1="28" y1="43" x2="252" y2="43" stroke="#e8ecf4" stroke-width="1"/>
+          <line x1="28" y1="76" x2="252" y2="76" stroke="#e8ecf4" stroke-width="1"/>
+          <path d="M28,76 L74,60 L120,28 L166,10 L212,28 L252,43 L252,82 L28,82 Z" fill="url(#ag)"/>
+          <path d="M28,76 L74,60 L120,28 L166,10 L212,28 L252,43" fill="none" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="28" cy="76" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="28" y="68" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">0</text>
+          <circle cx="74" cy="60" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="74" y="52" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">1</text>
+          <circle cx="120" cy="28" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="120" y="20" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">2</text>
+          <circle cx="166" cy="10" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="166" y="5" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">4</text>
+          <circle cx="212" cy="28" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="212" y="20" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">3</text>
+          <circle cx="252" cy="43" r="4" fill="#fff" stroke="#0d0d0d" stroke-width="2"/><text x="252" y="35" text-anchor="middle" font-size="9" fill="#64748b" font-family="DM Sans,sans-serif">2</text>
+          <text x="28" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Mon</text>
+          <text x="74" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Tue</text>
+          <text x="120" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Wed</text>
+          <text x="166" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Thu</text>
+          <text x="212" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Fri</text>
+          <text x="252" y="96" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="DM Sans,sans-serif">Sat</text>
+        </svg>
+      </div>
+      <div class="seat-dark">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em">Active Seat</span>
+          <span class="badge" style="background:rgba(16,185,129,.2);color:#6ee7b7;font-size:9px">✓ Checked In</span>
+        </div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:34px;color:#fff;line-height:1">A-12</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:4px">Section A · 10:00–12:00</div>
+        <button style="width:100%;margin-top:12px;padding:7px;background:rgba(255,255,255,.08);border:none;border-radius:9px;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Manage →</button>
+      </div>
+      <div class="premium-card">
+        <div style="display:flex;gap:12px">
+          <div class="premium-icon">🧠</div>
+          <div><div class="premium-title">Extend borrowing!</div><div class="premium-sub">Renew books instantly — no queue, no hassle.</div><button class="premium-btn">Renew Books</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKS -->
+<div id="page-books" class="view" style="background:var(--surface)">
+  <div class="sidebar">
+    <div class="sb-logo">L.</div>
+    <div class="sb-nav">
+      <button class="sb-item" onclick="showPage('dashboard')" title="Dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+      <button class="sb-item active" title="Books"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></button>
+      <button class="sb-item" onclick="showPage('history')" title="History"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+    </div>
+    <div class="sb-bottom"><div class="sb-avatar">JS</div></div>
+  </div>
+  <div class="bk-page">
+    <div style="margin-bottom:20px"><h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:22px;color:#0d0d0d">Library Books</h1><p style="font-size:12px;color:var(--sub);margin-top:2px">Browse and borrow from our collection</p></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <div class="rp-search" style="flex:1;min-width:200px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="bk-search" placeholder="Search by title, author, genre…" oninput="bkSearch(this.value)"/>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="bkTab(this,'all')">All</button>
+        <button class="tab" onclick="bkTab(this,'available')">Available</button>
+        <button class="tab" onclick="bkTab(this,'unavailable')">Borrowed Out</button>
+      </div>
+    </div>
+    <div id="books-grid" class="bk-grid"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="page-history" class="view" style="background:var(--surface)">
+  <div class="sidebar">
+    <div class="sb-logo">L.</div>
+    <div class="sb-nav">
+      <button class="sb-item" onclick="showPage('dashboard')" title="Dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+      <button class="sb-item" onclick="showPage('books')" title="Books"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></button>
+      <button class="sb-item active" title="History"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+    </div>
+    <div class="sb-bottom"><div class="sb-avatar">JS</div></div>
+  </div>
+  <div class="hist-page">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div><div class="hist-title">Borrow History</div><div class="hist-sub">All your borrowed books and fine records</div></div>
+      <button onclick="renderHistory('all')" style="display:flex;align-items:center;gap:6px;padding:9px 16px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--mid);font-family:'DM Sans',sans-serif"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh</button>
+    </div>
+    <div class="fine-banner" id="fine-banner">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="fine-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div><div class="fine-label">Outstanding Fine</div><div class="fine-amount">₹35.00</div><div class="fine-note">New borrowing blocked until cleared</div></div>
+      </div>
+      <button class="pay-btn" id="pay-btn" onclick="payFine()">Pay ₹35.00 Now</button>
+    </div>
+    <div class="hist-tabs">
+      <button class="hist-tab active" onclick="histTab(this,'all')">All <span id="h-cnt" style="margin-left:5px;background:rgba(0,0,0,.08);padding:1px 7px;border-radius:100px;font-size:10px">8</span></button>
+      <button class="hist-tab" onclick="histTab(this,'active')">Active</button>
+      <button class="hist-tab" onclick="histTab(this,'overdue')">Overdue</button>
+      <button class="hist-tab" onclick="histTab(this,'returned')">Returned</button>
+    </div>
+    <div id="history-list" class="hist-card"></div>
+  </div>
+</div>
+
+<!-- LANDING -->
+<div id="page-landing" class="view-block landing-page">
+  <nav class="ld-nav">
+    <div class="ld-logo"><div class="ld-logo-mark">L.</div><span class="ld-logo-name">LibraFlow</span></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="ld-signin" onclick="showPage('login')">Sign In</button>
+      <button class="ld-cta" onclick="showPage('register')">Get Started</button>
+    </div>
+  </nav>
+  <div class="ld-hero">
+    <div class="ld-hero-left">
+      <div class="ld-chip"><div class="ld-chip-dot"></div>Production-Ready · MERN Stack · Real-Time</div>
+      <h1 class="ld-h1">The Modern<br><span class="ld-em">Library System</span></h1>
+      <p class="ld-sub">A full-stack library management platform with live seat booking, intelligent fine tracking, and real-time notifications — designed for modern institutions.</p>
+      <div class="ld-btns">
+        <button class="ld-primary" onclick="showPage('register')">Start Free <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button class="ld-secondary" onclick="showPage('login')">Demo Admin Access</button>
+      </div>
+      <div style="font-size:11px;color:var(--sub);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="background:#fff;border:1px solid var(--border);color:var(--mid);padding:2px 8px;border-radius:6px;font-family:monospace;font-size:10px">admin@library.com</span>
+        <span style="background:#fff;border:1px solid var(--border);color:var(--mid);padding:2px 8px;border-radius:6px;font-family:monospace;font-size:10px">admin123</span>
+      </div>
+    </div>
+    <div class="ld-preview">
+      <div class="ld-preview-head">
+        <div class="ld-plogo">L.</div>
+        <div><p style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#0d0d0d">Hello Josh! 👋</p><p style="font-size:10px;color:var(--sub)">Good morning, welcome back.</p></div>
+      </div>
+      <div class="ld-stat-grid">
+        <div class="ld-pstat"><div class="ld-pstat-n">3</div><div class="ld-pstat-l">Books<br>borrowed</div></div>
+        <div class="ld-pstat"><div class="ld-pstat-n">0</div><div class="ld-pstat-l">Books<br>overdue</div></div>
+      </div>
+      <div class="ld-pbooks" id="ld-preview-books"></div>
+    </div>
+  </div>
+  <div class="ld-stats" id="ld-stats"></div>
+  <div class="feat-section"><div class="feat-h">Everything you need</div><p class="feat-sub">Built for students and administrators</p><div class="feat-grid" id="ld-feats"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="page-login" class="view-block">
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-glow"></div><div class="auth-dots"></div>
+      <div class="auth-logo"><div class="auth-logo-mark">L.</div><span class="auth-logo-name">LibraFlow</span></div>
+      <div class="auth-left-content">
+        <div class="auth-h">Welcome<br>back.</div>
+        <div class="auth-left-sub">Your library, smarter. Manage books, seats, and learning all in one place.</div>
+        <div class="auth-stat-grid" id="login-stats"></div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px"><div style="width:32px;height:32px;border-radius:8px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:14px">L.</div><span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#0d0d0d">LibraFlow</span></div>
+        <div class="auth-form-title">Sign in</div>
+        <div class="auth-form-sub">Enter your credentials to continue</div>
+        <div class="demo-btns">
+          <button class="demo-btn" style="border-color:#fde68a;background:#fffbeb;color:#92400e" onclick="fillLogin('admin@library.com','admin123')">🛡️ Admin Demo</button>
+          <button class="demo-btn" style="border-color:#c7d2fe;background:#eef2ff;color:#3730a3" onclick="fillLogin('student@library.com','student123')">🎓 Student Demo</button>
+        </div>
+        <label class="auth-label">Email Address</label>
+        <input type="email" class="auth-input" id="login-email" placeholder="you@example.com"/>
+        <label class="auth-label">Password</label>
+        <input type="password" class="auth-input" id="login-pass" placeholder="••••••••"/>
+        <button class="auth-submit" id="login-btn" onclick="handleLogin()">Sign In</button>
+        <div class="auth-bottom">Don't have an account? <a href="#" onclick="showPage('register');return false;">Create one</a></div>
+        <div style="text-align:center;margin-top:10px"><a href="#" onclick="showPage('landing');return false;" style="font-size:11px;color:var(--sub);text-decoration:none">← Back to homepage</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="page-register" class="view-block">
+  <div class="auth-wrap">
+    <div class="auth-left" style="width:380px">
+      <div class="auth-glow"></div><div class="auth-dots"></div>
+      <div class="auth-logo"><div class="auth-logo-mark">L.</div><span class="auth-logo-name">LibraFlow</span></div>
+      <div class="auth-left-content">
+        <div class="auth-h">Join<br>LibraFlow</div>
+        <div class="auth-left-sub">Create your student account to access books, seats, and more.</div>
+        <div id="reg-perks"></div>
+      </div>
+    </div>
+    <div class="auth-right" style="align-items:flex-start;padding-top:40px">
+      <div class="auth-form" style="max-width:440px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px"><div style="width:32px;height:32px;border-radius:8px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:900;font-size:14px">L.</div><span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#0d0d0d">LibraFlow</span></div>
+        <div class="auth-form-title">Create account</div>
+        <div class="auth-form-sub">Fill in your details to get started</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="grid-column:1/-1"><label class="auth-label">Full Name *</label><input class="auth-input" placeholder="Your full name"/></div>
+          <div><label class="auth-label">Student ID *</label><input class="auth-input" placeholder="STU2024001"/></div>
+          <div><label class="auth-label">Phone</label><input class="auth-input" placeholder="+91 00000 00000"/></div>
+          <div style="grid-column:1/-1"><label class="auth-label">Email *</label><input type="email" class="auth-input" placeholder="you@college.edu"/></div>
+          <div style="grid-column:1/-1"><label class="auth-label">Department</label><input class="auth-input" placeholder="Computer Science, Electronics…"/></div>
+          <div style="grid-column:1/-1"><label class="auth-label">Password *</label><input type="password" class="auth-input" placeholder="Min 6 characters"/></div>
+        </div>
+        <button class="auth-submit" id="reg-btn" onclick="handleRegister()">Create Account</button>
+        <div class="auth-bottom">Already have an account? <a href="#" onclick="showPage('login');return false;">Sign in</a></div>
+        <div style="text-align:center;margin-top:10px"><a href="#" onclick="showPage('landing');return false;" style="font-size:11px;color:var(--sub);text-decoration:none">← Back to homepage</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========= DATA ========= */
+var BOOKS = [
+  {id:1,title:'Clean Code',author:'Robert C. Martin',genre:'Programming',av:3,c1:'#1e293b',c2:'#334155',status:'borrowed',days_left:4,days_overdue:0,due_date_status:'ok'},
+  {id:2,title:'Design Patterns',author:'Gang of Four',genre:'Architecture',av:1,c1:'#312e81',c2:'#4338ca',status:'borrowed',days_left:2,days_overdue:0,due_date_status:'due_soon'},
+  {id:3,title:'The Pragmatic Programmer',author:'Hunt & Thomas',genre:'Engineering',av:0,c1:'#064e3b',c2:'#065f46',status:'borrowed',days_left:0,days_overdue:7,due_date_status:'overdue'},
+  {id:4,title:'Introduction to Algorithms',author:'CLRS',genre:'CS Theory',av:2,c1:'#7c2d12',c2:'#9a3412',status:'borrowed',days_left:11,days_overdue:0,due_date_status:'ok'},
+  {id:5,title:"You Don't Know JS",author:'Kyle Simpson',genre:'JavaScript',av:4,c1:'#4a044e',c2:'#6b21a8',status:'borrowed',days_left:7,days_overdue:0,due_date_status:'ok'},
+  {id:6,title:'System Design Interview',author:'Alex Xu',genre:'Design',av:0,c1:'#0c4a6e',c2:'#0369a1',status:'returned',days_left:null,days_overdue:0,due_date_status:'returned'},
+  {id:7,title:'Eloquent JavaScript',author:'Marijn Haverbeke',genre:'JavaScript',av:2,c1:'#1c1917',c2:'#292524',status:'returned',days_left:null,days_overdue:0,due_date_status:'returned'},
+  {id:8,title:'The Art of War',author:'Sun Tzu',genre:'Philosophy',av:5,c1:'#14532d',c2:'#166534',status:'returned',days_left:null,days_overdue:0,due_date_status:'returned'},
+  {id:9,title:'Atomic Habits',author:'James Clear',genre:'Self-Help',av:1,c1:'#1e1b4b',c2:'#312e81',status:'borrowed',days_left:6,days_overdue:0,due_date_status:'ok'},
+];
+
+var HISTORY = [
+  {id:1,title:'The Pragmatic Programmer',author:'Hunt & Thomas',c1:'#7c2d12',c2:'#9a3412',status:'borrowed',days_overdue:7,current_fine:35,due_date:'Mar 14'},
+  {id:2,title:'Design Patterns',author:'Gang of Four',c1:'#312e81',c2:'#4338ca',status:'borrowed',days_overdue:0,current_fine:0,due_date:'Mar 23',due_date_status:'due_soon'},
+  {id:3,title:'Clean Code',author:'Robert C. Martin',c1:'#1e293b',c2:'#334155',status:'borrowed',days_overdue:0,current_fine:0,due_date:'Mar 28'},
+  {id:4,title:'Introduction to Algorithms',author:'CLRS',c1:'#064e3b',c2:'#065f46',status:'returned',days_overdue:0,current_fine:0,due_date:'Mar 10'},
+  {id:5,title:"You Don't Know JS",author:'Kyle Simpson',c1:'#4a044e',c2:'#6b21a8',status:'returned',days_overdue:0,current_fine:0,due_date:'Feb 28'},
+  {id:6,title:'Eloquent JavaScript',author:'Marijn Haverbeke',c1:'#1c1917',c2:'#292524',status:'returned',days_overdue:0,current_fine:0,due_date:'Feb 14'},
+  {id:7,title:'System Design Interview',author:'Alex Xu',c1:'#0c4a6e',c2:'#0369a1',status:'returned',days_overdue:0,fine_amount:15,due_date:'Jan 30'},
+  {id:8,title:'Atomic Habits',author:'James Clear',c1:'#1e1b4b',c2:'#312e81',status:'borrowed',days_overdue:0,current_fine:0,due_date:'Apr 2'},
+];
+
+var FEATURES = [
+  {icon:'📚',title:'Smart Book Management',desc:'Search, reserve & borrow from thousands of titles with real-time availability.'},
+  {icon:'🪑',title:'Live Seat Booking',desc:'Visual floor map with real-time availability via Socket.io. Book in seconds.'},
+  {icon:'⏰',title:'Automated Fine System',desc:'7-day policy with ₹5/day late fees, automatically calculated and tracked.'},
+  {icon:'📊',title:'Rich Analytics',desc:'Admin dashboard with charts, student metrics, and occupancy reports.'},
+  {icon:'🔔',title:'Smart Notifications',desc:'Due date reminders, overdue alerts, and seat status via email + in-app.'},
+  {icon:'🔐',title:'Secure & Role-Based',desc:'JWT authentication with separate student and admin portals.'},
+];
+
+var STATS = [{num:'5,000+',label:'Books'},{num:'150',label:'Seats'},{num:'∞',label:'Users'},{num:'99.9%',label:'Uptime'}];
+var LOGIN_STATS = [{n:'5,000+',l:'Books'},{n:'150',l:'Seats'},{n:'Real-Time',l:'Updates'},{n:'7-Day',l:'Policy'}];
+var PERKS = ['Search 5,000+ books instantly','Book seats with time slots','Track dues & pay fines online','Get email reminders'];
+
+/* ========= STATE ========= */
+var dashFilterState = 'all';
+var dashSearchState = '';
+var bkTabState = 'all';
+var bkSearchState = '';
+var histFilterState = 'all';
+var fineCleared = false;
+
+/* ========= PAGE ROUTING ========= */
+function showPage(id) {
+  document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.view-block').forEach(function(el){ el.classList.remove('active'); });
+  var target = document.getElementById('page-' + id);
+  if (target) target.classList.add('active');
+  var pages = ['dashboard','books','history','landing','login','register'];
+  document.querySelectorAll('.nav-btn').forEach(function(btn, i){ btn.classList.toggle('active', pages[i] === id); });
+}
+
+/* ========= BADGE HELPERS ========= */
+function bookBadge(b) {
+  if (b.days_overdue > 0) return '<span class="badge badge-red">Overdue</span>';
+  if (b.due_date_status === 'due_soon') return '<span class="badge badge-amber">Due Soon</span>';
+  if (b.status === 'returned') return '<span class="badge badge-green">Returned</span>';
+  return '<span class="badge badge-blue">Active</span>';
+}
+function histBadge(r) {
+  if (r.days_overdue > 0) return '<span class="badge badge-red">Overdue</span>';
+  if (r.due_date_status === 'due_soon') return '<span class="badge badge-amber">Due Soon</span>';
+  if (r.status === 'returned') return '<span class="badge badge-green">Returned</span>';
+  return '<span class="badge badge-blue">Borrowed</span>';
+}
+
+/* ========= DASHBOARD BOOKS ========= */
+function renderDashBooks() {
+  var el = document.getElementById('dash-books-list');
+  if (!el) return;
+  var data = BOOKS.filter(function(b){ return b.status === 'borrowed' || b.days_overdue > 0; });
+  if (dashFilterState === 'active') data = data.filter(function(b){ return b.days_overdue === 0; });
+  else if (dashFilterState === 'overdue') data = data.filter(function(b){ return b.days_overdue > 0; });
+  else if (dashFilterState === 'due_soon') data = data.filter(function(b){ return b.due_date_status === 'due_soon'; });
+  if (dashSearchState) {
+    var q = dashSearchState.toLowerCase();
+    data = data.filter(function(b){ return b.title.toLowerCase().indexOf(q) > -1 || b.author.toLowerCase().indexOf(q) > -1; });
+  }
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--sub)"><div style="font-size:32px;margin-bottom:8px">📭</div><p style="font-size:13px">No books found</p></div>'; return; }
+  el.innerHTML = data.map(function(b) {
+    var timeText = b.days_overdue > 0 ? (b.days_overdue + 'd overdue') : (b.days_left != null ? b.days_left + 'd left' : '—');
+    return '<div class="book-row">'
+      + '<div class="book-cover" style="background:linear-gradient(145deg,' + b.c1 + ',' + b.c2 + ')">📖</div>'
+      + '<div style="flex:1;min-width:0"><div class="book-name">' + b.title + '</div><div class="book-author">by ' + b.author + '</div></div>'
+      + '<div class="book-time"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + timeText + '</div>'
+      + bookBadge(b)
+      + '<button class="view-btn">Details</button>'
+    + '</div>';
+  }).join('');
+}
+
+function dashFilter(btn, filter) {
+  document.querySelectorAll('#page-dashboard .tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  dashFilterState = filter;
+  renderDashBooks();
+}
+function dashSearch(val) { dashSearchState = val; renderDashBooks(); }
+
+/* ========= BOOKS GRID ========= */
+function renderBooksGrid() {
+  var el = document.getElementById('books-grid');
+  if (!el) return;
+  var data = BOOKS.slice();
+  if (bkTabState === 'available') data = data.filter(function(b){ return b.av > 0; });
+  else if (bkTabState === 'unavailable') data = data.filter(function(b){ return b.av === 0; });
+  if (bkSearchState) {
+    var q = bkSearchState.toLowerCase();
+    data = data.filter(function(b){ return b.title.toLowerCase().indexOf(q)>-1 || b.author.toLowerCase().indexOf(q)>-1 || b.genre.toLowerCase().indexOf(q)>-1; });
+  }
+  if (!data.length) { el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub)"><div style="font-size:40px;margin-bottom:10px">📚</div><p style="font-size:14px;font-weight:600;color:#475569;margin-bottom:6px">No books found</p><p style="font-size:12px">Try a different search</p></div>'; return; }
+  el.innerHTML = data.map(function(b) {
+    var bg = b.av > 0 ? 'rgba(240,253,244,.92)' : 'rgba(254,242,242,.92)';
+    var color = b.av > 0 ? '#16a34a' : '#dc2626';
+    var avText = b.av > 0 ? (b.av + ' left') : 'Out';
+    var btnBg = b.av > 0 ? '#0d0d0d' : '#f1f5f9';
+    var btnColor = b.av > 0 ? '#fff' : '#94a3b8';
+    var btnCursor = b.av > 0 ? 'pointer' : 'not-allowed';
+    var btnText = b.av > 0 ? 'Borrow' : 'Unavailable';
+    var clickAttr = b.av > 0 ? 'onclick="borrowBook(' + b.id + ',this)"' : 'disabled';
+    return '<div class="bk-card-item">'
+      + '<div class="bk-cover" style="background:linear-gradient(145deg,' + b.c1 + ',' + b.c2 + ')">📖'
+        + '<span class="badge" style="position:absolute;top:8px;right:8px;background:' + bg + ';color:' + color + '">' + avText + '</span>'
+      + '</div>'
+      + '<div class="bk-body">'
+        + '<div class="bk-title">' + b.title + '</div>'
+        + '<div class="bk-author">' + b.author + '</div>'
+        + '<span class="badge badge-gray" style="margin-bottom:8px;display:inline-flex">' + b.genre + '</span>'
+        + '<button class="bk-borrow-btn" ' + clickAttr + ' style="background:' + btnBg + ';color:' + btnColor + ';cursor:' + btnCursor + '">' + btnText + '</button>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function bkTab(btn, filter) {
+  document.querySelectorAll('#page-books .tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  bkTabState = filter;
+  renderBooksGrid();
+}
+function bkSearch(val) { bkSearchState = val; renderBooksGrid(); }
+
+function borrowBook(id, btn) {
+  btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spinMe .7s linear infinite"></span>';
+  btn.disabled = true;
+  setTimeout(function() {
+    var book = null;
+    for (var i = 0; i < BOOKS.length; i++) { if (BOOKS[i].id === id) { book = BOOKS[i]; break; } }
+    if (book && book.av > 0) {
+      book.av--;
+      btn.textContent = book.av > 0 ? 'Borrow' : 'Unavailable';
+      btn.style.background = book.av > 0 ? '#0d0d0d' : '#f1f5f9';
+      btn.style.color = book.av > 0 ? '#fff' : '#94a3b8';
+      if (book.av === 0) btn.disabled = true; else btn.disabled = false;
+      toast('Book borrowed! Happy reading 📖', 'green');
+    }
+  }, 900);
+}
+
+/* ========= HISTORY ========= */
+function renderHistory(filter) {
+  if (filter) histFilterState = filter;
+  var el = document.getElementById('history-list');
+  if (!el) return;
+  var data = HISTORY.slice();
+  if (histFilterState === 'active') data = data.filter(function(r){ return r.status === 'borrowed' && r.days_overdue === 0; });
+  else if (histFilterState === 'overdue') data = data.filter(function(r){ return r.days_overdue > 0; });
+  else if (histFilterState === 'returned') data = data.filter(function(r){ return r.status === 'returned'; });
+  var cntEl = document.getElementById('h-cnt');
+  if (cntEl) cntEl.textContent = HISTORY.length;
+  if (!data.length) { el.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--sub)"><div style="font-size:36px;margin-bottom:8px">📭</div><p style="font-size:13px;font-weight:600;color:#475569;margin-bottom:4px">No records</p><p style="font-size:12px">Nothing to show in this category</p></div>'; return; }
+  el.innerHTML = data.map(function(r) {
+    var fine = parseFloat(r.current_fine || r.fine_amount || 0);
+    var overdueTag = r.days_overdue > 0 ? '<span style="font-size:10px;color:#dc2626;font-weight:600">' + r.days_overdue + 'd late</span>' : '';
+    var fineTag = fine > 0 ? '<span class="badge badge-red">₹' + fine.toFixed(0) + '</span>' : '';
+    return '<div class="hist-row">'
+      + '<div class="hist-cover" style="background:linear-gradient(145deg,' + r.c1 + ',' + r.c2 + ')">📘</div>'
+      + '<div style="flex:1;min-width:0"><div class="hist-book-title">' + r.title + '</div><div class="hist-book-author">by ' + r.author + '</div></div>'
+      + '<div style="flex-shrink:0;text-align:right"><div style="font-size:11px;color:var(--mid);font-weight:600">' + r.due_date + '</div><div style="font-size:10px;color:var(--sub)">Due date</div></div>'
+      + '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px">' + histBadge(r) + overdueTag + fineTag + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function histTab(btn, filter) {
+  document.querySelectorAll('.hist-tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderHistory(filter);
+}
+
+function payFine() {
+  var btn = document.getElementById('pay-btn');
+  btn.textContent = 'Processing…';
+  btn.disabled = true;
+  setTimeout(function() {
+    var banner = document.getElementById('fine-banner');
+    if (banner) { banner.style.transition = 'all .4s'; banner.style.opacity = '0'; banner.style.transform = 'translateY(-8px)'; setTimeout(function(){ banner.style.display='none'; }, 400); }
+    HISTORY.forEach(function(r){ r.current_fine = 0; r.fine_amount = 0; });
+    fineCleared = true;
+    renderHistory(histFilterState);
+    toast('₹35.00 fine paid successfully! ✓', 'green');
+  }, 1000);
+}
+
+/* ========= LANDING ========= */
+function renderLanding() {
+  var pb = document.getElementById('ld-preview-books');
+  if (pb) {
+    var prev = [{title:'Clean Code',author:'Robert C. Martin',c1:'#1e293b',c2:'#334155'},{title:'Design Patterns',author:'Gang of Four',c1:'#312e81',c2:'#4338ca'},{title:'Pragmatic Programmer',author:'Hunt & Thomas',c1:'#064e3b',c2:'#065f46'}];
+    pb.innerHTML = '<div class="ld-pbooks-title">My Books</div>'
+      + prev.map(function(b){ return '<div class="ld-prow"><div class="ld-pcover" style="background:linear-gradient(145deg,' + b.c1 + ',' + b.c2 + ')"></div><div style="flex:1;min-width:0"><div class="ld-ptitle">' + b.title + '</div><div class="ld-pauthor">by ' + b.author + '</div></div><span class="badge badge-blue" style="font-size:9px">Active</span></div>'; }).join('');
+  }
+  var sr = document.getElementById('ld-stats');
+  if (sr) sr.innerHTML = STATS.map(function(s){ return '<div class="lstat"><div class="lstat-n">' + s.num + '</div><div class="lstat-l">' + s.label + '</div></div>'; }).join('');
+  var fg = document.getElementById('ld-feats');
+  if (fg) fg.innerHTML = FEATURES.map(function(f){ return '<div class="feat"><div class="feat-icon">' + f.icon + '</div><div class="feat-title">' + f.title + '</div><div class="feat-desc">' + f.desc + '</div></div>'; }).join('');
+}
+
+/* ========= AUTH ========= */
+function renderAuth() {
+  var ls = document.getElementById('login-stats');
+  if (ls) ls.innerHTML = LOGIN_STATS.map(function(s){ return '<div class="auth-stat"><div class="auth-stat-n">' + s.n + '</div><div class="auth-stat-l">' + s.l + '</div></div>'; }).join('');
+  var rp = document.getElementById('reg-perks');
+  if (rp) rp.innerHTML = PERKS.map(function(p){ return '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;font-size:12px;color:rgba(255,255,255,.45)"><div style="width:15px;height:15px;background:rgba(99,102,241,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>' + p + '</div>'; }).join('');
+}
+
+function fillLogin(email, pass) {
+  document.getElementById('login-email').value = email;
+  document.getElementById('login-pass').value = pass;
+}
+
+function handleLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  var btn = document.getElementById('login-btn');
+  if (!email || !pass) { toast('Please enter email and password', 'red'); return; }
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spinMe .7s linear infinite;vertical-align:middle;margin-right:6px"></span>Signing in…';
+  btn.disabled = true;
+  setTimeout(function() {
+    if ((email === 'admin@library.com' && pass === 'admin123') || pass === 'student123') {
+      toast('Welcome back! ✓', 'green');
+      setTimeout(function(){ showPage('dashboard'); btn.textContent = 'Sign In'; btn.disabled = false; }, 800);
+    } else {
+      toast('Invalid credentials. Use the demo buttons above.', 'red');
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    }
+  }, 900);
+}
+
+function handleRegister() {
+  var btn = document.getElementById('reg-btn');
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spinMe .7s linear infinite;vertical-align:middle;margin-right:6px"></span>Creating account…';
+  btn.disabled = true;
+  setTimeout(function() {
+    toast('Account created! Welcome to LibraFlow ✓', 'green');
+    setTimeout(function(){ showPage('dashboard'); btn.textContent = 'Create Account'; btn.disabled = false; }, 800);
+  }, 1000);
+}
+
+/* ========= TOAST ========= */
+function toast(msg, type) {
+  var old = document.getElementById('lf-toast');
+  if (old) old.remove();
+  var el = document.createElement('div');
+  el.id = 'lf-toast';
+  el.textContent = msg;
+  Object.assign(el.style, {position:'fixed',bottom:'24px',right:'24px',zIndex:'9999',background:type==='green'?'#0d0d0d':'#dc2626',color:'#fff',padding:'12px 20px',borderRadius:'12px',fontFamily:"'DM Sans',sans-serif",fontWeight:'600',fontSize:'13px',boxShadow:'0 8px 24px rgba(0,0,0,.15)',animation:'toastIn .25s ease',maxWidth:'320px',lineHeight:'1.4'});
+  document.body.appendChild(el);
+  setTimeout(function(){ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(function(){ el.remove(); },300); }, 3000);
+}
+
+/* ========= INIT ========= */
+document.addEventListener('DOMContentLoaded', function() {
+  renderDashBooks();
+  renderBooksGrid();
+  renderHistory('all');
+  renderLanding();
+  renderAuth();
+});
+</script>
+</body>
+</html>
