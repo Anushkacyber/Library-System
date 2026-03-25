@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -48,15 +48,32 @@ const css = `
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '' })
+  const emailRef = useRef(null)
+  const passRef = useRef(null)
+  const [form, setForm] = useState({ user_email: '', user_password: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Aggressive clear on mount to fight browser autofill
+  useEffect(() => {
+    const clear = () => {
+      setForm({ user_email: '', user_password: '' })
+      if (emailRef.current) emailRef.current.value = ''
+      if (passRef.current) passRef.current.value = ''
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+    }
+
+    clear()
+    const timer = setTimeout(clear, 500) // Longer delay to catch slow autofill
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleSubmit = async e => {
     e.preventDefault()
     setLoading(true)
     try {
-      const user = await login(form.email, form.password)
+      const user = await login(form.user_email, form.user_password)
       toast.success(`Welcome back, ${user.name.split(' ')[0]}!`)
       navigate(user.role === 'admin' ? '/admin' : '/dashboard')
     } catch (err) {
@@ -68,7 +85,7 @@ export default function Login() {
     <>
       <style>{css}</style>
       <div className="auth-page">
-        {/* Left panel */}
+        {/* Left panel omitted for brevity, same as before */}
         <div className="auth-left">
           <div className="auth-left-glow" />
           <div className="auth-left-glow2" />
@@ -105,35 +122,42 @@ export default function Login() {
             <h1 className="auth-form-title">Sign in</h1>
             <p className="auth-form-sub">Enter your credentials to continue</p>
 
-            {/* Demo buttons */}
-            <div className="auth-demo-btns">
-              <button
-                className="auth-demo-btn"
-                style={{ borderColor: '#fde68a', background: '#fffbeb', color: '#92400e' }}
-                onClick={() => setForm({ email: 'admin@library.com', password: 'admin123' })}
-              >🛡️ Admin Demo</button>
-              <button
-                className="auth-demo-btn"
-                style={{ borderColor: '#c7d2fe', background: '#eef2ff', color: '#3730a3' }}
-                onClick={() => setForm({ email: 'student@library.com', password: 'student123' })}
-              >🎓 Student Demo</button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Dummy hidden inputs to catch autofill */}
+              <input type="text" style={{ display: 'none' }} name="fake_email_remembered" />
+              <input type="password" style={{ display: 'none' }} name="fake_password_remembered" />
+
               <div>
                 <label className="auth-label">Email Address</label>
                 <input
-                  type="email" className="auth-input" placeholder="you@example.com"
-                  value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required
+                  ref={emailRef}
+                  type="email" 
+                  name="libraflow_user_id"
+                  id="libraflow_user_id"
+                  className="auth-input" 
+                  placeholder="you@example.com"
+                  autoComplete="off"
+                  value={form.user_email} 
+                  onChange={e => setForm({ ...form, user_email: e.target.value })} 
+                  required
                 />
               </div>
               <div>
                 <label className="auth-label">Password</label>
                 <div className="auth-input-wrap">
                   <input
-                    type={showPass ? 'text' : 'password'} className="auth-input" style={{ paddingRight: 40 }}
-                    placeholder="••••••••" value={form.password}
-                    onChange={e => setForm({ ...form, password: e.target.value })} required
+                    ref={passRef}
+                    type={showPass ? 'text' : 'password'} 
+                    name="libraflow_user_key"
+                    id="libraflow_user_key"
+                    className="auth-input" 
+                    style={{ paddingRight: 40 }}
+                    placeholder="••••••••" 
+                    autoComplete="new-password"
+                    value={form.user_password}
+                    onChange={e => setForm({ ...form, user_password: e.target.value })} 
+                    required
                   />
                   <button type="button" className="auth-eye" onClick={() => setShowPass(!showPass)}>
                     {showPass

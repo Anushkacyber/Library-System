@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -57,43 +58,44 @@ const ADMIN_NAV = [
 export default function AdminLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const handleLogout = () => { logout(); navigate('/') }
   
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex min-h-screen bg-[#f8f9fc] font-dm">
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside style={{
-        width: 240, background: '#0d0d0d', color: '#fff',
-        display: 'flex', flexDirection: 'column', flexShrink: 0,
-        position: 'sticky', top: 0, height: '100vh', zIndex: 100,
-      }}>
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-60 bg-[#0d0d0d] text-white flex flex-col shrink-0
+        transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
         {/* Logo */}
-        <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8, background: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900, fontSize: 14, color: '#0d0d0d'
-          }}>L.</div>
-          <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 16 }}>Admin Portal</span>
+        <div className="p-6 flex items-center gap-3 border-b border-white/5">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-plus font-black text-sm text-[#0d0d0d]">L.</div>
+          <span className="font-plus font-extrabold text-base tracking-tight">Admin Portal</span>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
           {ADMIN_NAV.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/admin'}
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '10px 12px', borderRadius: 10,
-                textDecoration: 'none', color: isActive ? '#fff' : 'rgba(255,255,255,0.45)',
-                background: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
-                fontSize: 14, fontWeight: 600, transition: 'all 0.2s',
-              })}
-              onMouseEnter={e => { if (!e.currentTarget.style.background.includes('0.1')) e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
-              onMouseLeave={e => { if (!e.currentTarget.style.background.includes('0.1')) e.currentTarget.style.color = 'rgba(255,255,255,0.45)' }}
+              onClick={() => setIsSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
+                ${isActive ? 'bg-white/10 text-white' : 'text-white/45 hover:text-white/80 hover:bg-white/5'}
+              `}
             >
               {icon}
               {label}
@@ -102,26 +104,19 @@ export default function AdminLayout() {
         </nav>
 
         {/* User Card */}
-        <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{ 
-              width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12
-            }}>AD</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Admin'}</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Super Administrator</p>
+        <div className="p-5 border-t border-white/5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center font-bold text-xs">AD</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold truncate">{user?.name || 'Admin'}</p>
+              <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Super Admin</p>
             </div>
           </div>
           <button 
             onClick={handleLogout}
-            style={{ 
-              width: '100%', padding: '8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-              background: 'transparent', color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
-            }}
+            className="w-full p-2.5 rounded-xl border border-white/10 bg-transparent text-red-500 text-xs font-bold hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{width:16,height:16}}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
             Sign Out
@@ -130,26 +125,34 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, minWidth: 0, padding: '32px 40px', overflowY: 'auto' }}>
-        <header style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 24, color: '#0d0d0d' }}>System Administration</h2>
-            <p style={{ color: '#94a3b8', fontSize: 14, marginTop: 4 }}>Monitor and manage the library resources</p>
+      <main className="flex-1 min-w-0 p-6 lg:p-10 overflow-y-auto">
+        <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Hamburger for mobile */}
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-900 shadow-sm"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <div>
+              <h2 className="font-plus font-extrabold text-2xl lg:text-3xl text-[#0d0d0d] tracking-tight">System Administration</h2>
+              <p className="text-slate-400 text-sm font-medium mt-1">Monitor and manage the library resources</p>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-             <Link to="/dashboard" style={{
-               padding: '8px 16px', borderRadius: 10, background: '#fff', border: '1.5px solid #e0e4ee',
-               color: '#0d0d0d', fontSize: 13, fontWeight: 600, textDecoration: 'none'
-             }}>Student View</Link>
+          <div className="flex gap-3">
+             <button 
+               onClick={() => navigate('/dashboard')}
+               className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-bold shadow-sm hover:bg-slate-50 transition-colors"
+             >
+               Student View
+             </button>
           </div>
         </header>
         <Outlet />
       </main>
     </div>
   )
-}
-
-function Link({ to, children, ...props }) {
-  const navigate = useNavigate()
-  return <a href={to} onClick={e => { e.preventDefault(); navigate(to) }} {...props}>{children}</a>
 }

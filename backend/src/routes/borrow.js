@@ -4,6 +4,62 @@ const db = require('../config/db');
 const { protect, adminOnly } = require('../middleware/auth');
 const { calculateFine, getDueDateStatus } = require('../utils/fineCalculator');
 
+router.post('/', protect, async (req, res, next) => {
+  try {
+    const { book_id } = req.body;
+    const student_id = req.user.id;
+
+    // 1. Check if student has unpaid fines
+    const { rows: student } = await db.query('SELECT * FROM users WHERE id=$1', [student_id]);
+    if (!student[0]) return res.status(404).json({ success: false, message: 'Student not found' });
+    if (parseFloat(student[0].fine_balance) > 0) {
+      return res.status(400).json({ success: false, message: `You have unpaid fine: ₹${student[0].fine_balance}. Please clear it before borrowing more books.` });
+    }
+
+    // 2. Check if already has this book borrowed
+    const already = await db.query("SELECT id FROM borrow_records WHERE user_id=$1 AND book_id=$2 AND status='borrowed'", [student_id, book_id]);
+    if (already.rows[0]) return res.status(400).json({ success: false, message: 'You already have this book borrowed.' });
+
+    // 3. Check if book available
+    const { rows: book } = await db.query('SELECT * FROM books WHERE id=$1 AND is_active=true AND available_copies > 0', [book_id]);
+    if (!book[0]) return res.status(400).json({ success: false, message: 'Book not available at the moment.' });
+
+    // 4. Atomic transaction
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + (parseInt(process.env.BORROW_DAYS) || 7));
+    
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+      
+      // Create borrow record
+      const { rows: record } = await client.query(
+        `INSERT INTO borrow_records (user_id, book_id, due_date) VALUES ($1,$2,$3) RETURNING *`,
+        [student_id, book_id, dueDate]
+      );
+
+      // Decrement available copies
+      await client.query('UPDATE books SET available_copies = available_copies - 1 WHERE id=$1', [book_id]);
+
+      // Notify
+      await client.query(
+        `INSERT INTO notifications (user_id, title, message, type) VALUES ($1,$2,$3,$4)`,
+        [student_id, 'Book Borrowed', `You've borrowed "${book[0].title}". Due: ${dueDate.toDateString()}`, 'success']
+      );
+
+      await client.query('COMMIT');
+      res.status(201).json({ success: true, record: record[0] });
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/my-history', protect, async (req, res, next) => {
   try {
     const { rows } = await db.query(`SELECT br.*, b.title, b.author, b.cover_image, b.isbn FROM borrow_records br JOIN books b ON b.id = br.book_id WHERE br.user_id = $1 ORDER BY br.issue_date DESC`, [req.user.id]);

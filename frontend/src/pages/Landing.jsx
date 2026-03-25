@@ -124,13 +124,6 @@ export default function Landing() {
                 Start Free
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 14, height: 14 }}><polyline points="9 18 15 12 9 6"/></svg>
               </Link>
-              <Link to="/login" className="ld-btn-secondary">Demo Admin Access</Link>
-            </div>
-            <div className="ld-creds">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 12, height: 12 }}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Demo: <span className="ld-cred-code">admin@library.com</span>
-              <span className="ld-cred-code">admin123</span>
-              <span style={{ color: '#c7d0e0' }}>· Students self-register</span>
             </div>
           </div>
 

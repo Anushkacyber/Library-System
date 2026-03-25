@@ -6,13 +6,14 @@ const { protect, adminOnly } = require('../middleware/auth');
 router.get('/dashboard', protect, adminOnly, async (req, res, next) => {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const [users, books, borrows, seats, overdue, fines] = await Promise.all([
+    const [users, books, borrows, seats, overdue, fines, peaks] = await Promise.all([
       db.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - INTERVAL '30 days' THEN 1 END) as new_this_month FROM users WHERE role='student'`),
       db.query(`SELECT COUNT(*) as total, SUM(total_copies) as total_copies, SUM(available_copies) as available_copies FROM books WHERE is_active=true`),
       db.query(`SELECT COUNT(*) as active FROM borrow_records WHERE status='borrowed'`),
       db.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN EXISTS (SELECT 1 FROM seat_bookings sb WHERE sb.seat_id=s.id AND sb.booking_date=$1 AND sb.status IN ('active','checked_in')) THEN 1 END) as occupied FROM seats s WHERE s.is_active=true`, [today]),
       db.query(`SELECT COUNT(*) as count FROM borrow_records WHERE status='borrowed' AND due_date < NOW()`),
       db.query(`SELECT SUM(fine_balance) as total_pending FROM users WHERE fine_balance > 0`),
+      db.query(`SELECT EXTRACT(HOUR FROM start_time) as hour, COUNT(*) as bookings FROM seat_bookings WHERE booking_date = $1 GROUP BY hour ORDER BY hour`, [today]),
     ]);
     const { rows: recentBorrows } = await db.query(`SELECT br.*, b.title, u.name as student_name FROM borrow_records br JOIN books b ON b.id=br.book_id JOIN users u ON u.id=br.user_id ORDER BY br.created_at DESC LIMIT 8`);
     res.json({
@@ -22,6 +23,7 @@ router.get('/dashboard', protect, adminOnly, async (req, res, next) => {
         totalBooks: parseInt(books.rows[0].total), totalCopies: parseInt(books.rows[0].total_copies || 0), availableCopies: parseInt(books.rows[0].available_copies || 0),
         activeBorrows: parseInt(borrows.rows[0].active), totalSeats: parseInt(seats.rows[0].total), occupiedSeats: parseInt(seats.rows[0].occupied || 0),
         overdueBooks: parseInt(overdue.rows[0].count), pendingFines: parseFloat(fines.rows[0].total_pending || 0),
+        occupancyTrends: peaks.rows,
       },
       recentActivity: recentBorrows,
     });

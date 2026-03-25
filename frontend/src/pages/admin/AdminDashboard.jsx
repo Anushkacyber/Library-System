@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Activity */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
             <div className="p-6 border-bottom border-slate-100 flex justify-between items-center">
               <h3 className="font-bold text-slate-900">Recent Borrowing Activity</h3>
@@ -82,6 +82,32 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Occupancy Analytics */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-slate-900">Seat Occupancy Analytics</h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Today's Peak Hours</span>
+            </div>
+            <div className="h-48 flex items-end gap-2 px-2">
+              {[...Array(24)].map((_, i) => {
+                const hourData = stats.occupancyTrends.find(t => parseInt(t.hour) === i)
+                const height = hourData ? Math.min((parseInt(hourData.bookings) / 10) * 100, 100) : 0
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
+                    <div className="relative w-full bg-slate-50 rounded-t-lg transition-all hover:bg-indigo-100 min-h-[4px]" style={{ height: `${height}%` }}>
+                      {hourData && (
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          {hourData.bookings} bookings
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[8px] font-bold text-slate-400">{i}h</span>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

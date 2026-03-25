@@ -37,9 +37,14 @@ router.get('/:id', protect, async (req, res, next) => {
 
 router.post('/', protect, adminOnly, async (req, res, next) => {
   try {
-    const { title, author, isbn, genre, publisher, publish_year, description, total_copies, cover_image, location } = req.body;
+    let { title, author, isbn, genre, publisher, publish_year, description, total_copies, cover_image, location } = req.body;
+    
+    // Sanitize numeric fields
+    const sanitizedPublishYear = publish_year === '' ? null : publish_year;
+    const sanitizedTotalCopies = total_copies === '' ? 1 : (parseInt(total_copies) || 1);
+
     const { rows } = await db.query(`INSERT INTO books (title, author, isbn, genre, publisher, publish_year, description, total_copies, available_copies, cover_image, location) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8,$9,$10) RETURNING *`,
-      [title, author, isbn, genre, publisher, publish_year, description, total_copies || 1, cover_image, location]);
+      [title, author, isbn || null, genre || null, publisher || null, sanitizedPublishYear, description || null, sanitizedTotalCopies, cover_image || null, location || null]);
     res.status(201).json({ success: true, book: rows[0] });
   } catch (err) { next(err); }
 });
@@ -47,8 +52,13 @@ router.post('/', protect, adminOnly, async (req, res, next) => {
 router.put('/:id', protect, adminOnly, async (req, res, next) => {
   try {
     const { title, author, isbn, genre, publisher, publish_year, description, total_copies, cover_image, location } = req.body;
+    
+    // Sanitize numeric fields
+    const sanitizedPublishYear = publish_year === '' ? null : publish_year;
+    const sanitizedTotalCopies = total_copies === '' ? 1 : (parseInt(total_copies) || 1);
+
     const { rows } = await db.query(`UPDATE books SET title=$1, author=$2, isbn=$3, genre=$4, publisher=$5, publish_year=$6, description=$7, total_copies=$8, cover_image=$9, location=$10, updated_at=NOW() WHERE id=$11 RETURNING *`,
-      [title, author, isbn, genre, publisher, publish_year, description, total_copies, cover_image, location, req.params.id]);
+      [title, author, isbn || null, genre || null, publisher || null, sanitizedPublishYear, description || null, sanitizedTotalCopies, cover_image || null, location || null, req.params.id]);
     if (!rows[0]) return res.status(404).json({ success: false, message: 'Book not found' });
     res.json({ success: true, book: rows[0] });
   } catch (err) { next(err); }

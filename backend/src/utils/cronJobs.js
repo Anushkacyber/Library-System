@@ -26,14 +26,34 @@ const setupCronJobs = (io) => {
     } catch (err) { console.error('Cron error:', err); }
   });
 
-  // Every 30 min: release expired seats
-  cron.schedule('*/30 * * * *', async () => {
+  // Every 1 min: release seats if not checked in within 15 mins
+  cron.schedule('* * * * *', async () => {
     try {
-      const { rows } = await db.query(`
+      // Auto-release no-shows (15 mins)
+      const { rows: noShows } = await db.query(`
+        UPDATE seat_bookings SET status='auto_released'
+        WHERE status='active' 
+          AND booking_date = CURRENT_DATE
+          AND (CURRENT_TIME > (start_time + INTERVAL '15 minutes'))
+        RETURNING *
+      `);
+
+      // Auto-release past dates
+      const { rows: pastDates } = await db.query(`
         UPDATE seat_bookings SET status='auto_released'
         WHERE status='active' AND booking_date < CURRENT_DATE RETURNING *
       `);
-      if (rows.length > 0 && io) io.emit('seatsRefresh');
+
+      if ((noShows.length > 0 || pastDates.length > 0) && io) {
+        io.emit('seatsRefresh');
+        // Notify users
+        for (const b of noShows) {
+          io.to(`user:${b.user_id}`).emit('notification', {
+            type: 'warning',
+            message: `Your seat ${b.seat_id} was released due to no check-in.`
+          });
+        }
+      }
     } catch (err) { console.error('Seat release cron error:', err); }
   });
 

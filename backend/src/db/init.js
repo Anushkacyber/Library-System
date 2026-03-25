@@ -134,6 +134,9 @@ const initializeDatabase = async () => {
     // Seed admin user
     await seedAdmin();
 
+    // Seed student user
+    await seedStudent();
+
     console.log('✅ Database initialized successfully');
   } catch (err) {
     await client.query('ROLLBACK');
@@ -178,6 +181,19 @@ const seedAdmin = async () => {
   `, ['Admin User', 'admin@library.com', hashedPassword, 'admin', 'ADMIN001']);
 
   console.log('✅ Admin seeded: admin@library.com / admin123');
+};
+
+const seedStudent = async () => {
+  const bcrypt = require('bcryptjs');
+  const hashedPassword = await bcrypt.hash('student123', 12);
+
+  await db.query(`
+    INSERT INTO users (name, email, password, role, student_id)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (email) DO NOTHING
+  `, ['Student User', 'student@library.com', hashedPassword, 'student', 'STUDENT001']);
+
+  console.log('✅ Student seeded: student@library.com / student123');
 };
 
 initializeDatabase()

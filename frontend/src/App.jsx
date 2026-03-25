@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import BooksPage from './pages/Books'
 import SeatsPage from './pages/Seats'
 import BorrowHistory from './pages/BorrowHistory'
+import Settings from './pages/Settings'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminBooks from './pages/admin/AdminBooks'
 import AdminStudents from './pages/admin/AdminStudents'
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/books" element={<BooksPage />} />
         <Route path="/seats" element={<SeatsPage />} />
         <Route path="/history" element={<BorrowHistory />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route element={<Protected adminOnly><AdminLayout /></Protected>}>
         <Route path="/admin" element={<AdminDashboard />} />
